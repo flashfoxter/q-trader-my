@@ -1,9 +1,12 @@
-import keras
-from keras.models import Sequential
-from keras.models import load_model
-from keras.layers import Dense
-from keras.optimizers import Adam
+import tensorflow.keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+#from tensorflow.keras.keras.layers import Dense
+from tensorflow.keras.callbacks import ModelCheckpoint
 
+import os
 import numpy as np
 import random
 from collections import deque
@@ -54,7 +57,19 @@ class Agent:
 
 			target_f = self.model.predict(state)
 			target_f[0][action] = target
-			self.model.fit(state, target_f, epochs=1, verbose=0)
+
+			checkpoint_filepath = 'checkpoint_directory/cp-{epoch:04d}.ckpt'
+			checkpoint = ModelCheckpoint(filepath=checkpoint_filepath, 
+													monitor='val_accuracy',
+                                                    save_weights_only=False, 
+                                                    verbose=1, 
+													mode='max')
+													#save_freq='epoch')
+			
+			callbacks_list = [checkpoint]
+			self.model.fit(state, target_f, epochs=1, verbose=0, callbacks = callbacks_list)
+			
+
 
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay 
